@@ -1,55 +1,96 @@
-# Devops-Task2
-Ansible Playbook: Deploy Node Exporter, Prometheus, and Grafana
+##Ansible Playbook to Deploy Node Exporter on Multiple Hosts and Set Up Grafana & Prometheus
 
-This Ansible playbook is designed to deploy Node Exporter, Prometheus, and Grafana on a local machine. Node Exporter is a Prometheus exporter that collects system metrics from the machine. Prometheus is a monitoring and alerting toolkit, and Grafana is used for data visualization.
-Prerequisites
+#Step 1: Prerequisites
 
-Before running this playbook, ensure that the following requirements are met:
+Before proceeding with the playbook, ensure that you have the following prerequisites:
 
-    Ansible is installed on your local machine.
-    The target machine is reachable and properly configured for Ansible communication.
-    Make sure that the prometheus.yml.j2 and grafana_datasource.yml files are present in the same directory as this playbook.
+    Ansible installed on your laptop.
+    Multiple target hosts where you want to deploy Node Exporter (ensure SSH access is set up).
 
-How to Use
+#Step 2: Create the Ansible Playbook
 
-    Clone this repository to your local machine.
-    Navigate to the directory containing the playbook and template files.
-    Review the playbook to make sure the tasks and configurations suit your specific use case and environment.
-    Run the playbook using the following command:
+Create a new file named deploy_node_exporter.yml with the following content:
+
+yaml
+
+---
+- name: Deploy Node Exporter
+  hosts: your_target_group  # Replace with the group of hosts defined in your hosts file
+
+  tasks:
+    - name: Install Node Exporter
+      apt:
+        name: prometheus-node-exporter  # For Ubuntu/Debian systems. Adjust package name for other systems.
+        state: present
+      become: true
+
+    # Add any other tasks you need for the deployment
+    # For example, you might want to start the Node Exporter service and enable it to start on boot.
+
+Replace your_target_group with the appropriate group name from your hosts file. If you don't have an existing hosts file, create one and define your target hosts:
+
+ini
+
+[your_target_group]
+hostname1
+hostname2
+hostname3
+# Add all your target hosts here
+
+#Step 3: Deploy Node Exporter to Multiple Hosts
+
+Run the Ansible playbook using the following command:
 
 bash
 
-ansible-playbook playbook.yml
+ansible-playbook -i /path/to/your/hosts/file deploy_node_exporter.yml
 
-Replace playbook.yml with the name of the file containing the Ansible code.
-Playbook Overview
+This will install Node Exporter on all the target hosts specified in the your_target_group.
 
-The playbook consists of the following tasks:
+#Step 4: Set Up Grafana & Prometheus on Your Laptop
 
-    Install necessary dependencies (curl) using the apt package manager if it is available.
-    Download Node Exporter from GitHub using get_url and store it in /tmp/node_exporter.tar.gz.
-    Extract the Node Exporter archive to /tmp using unarchive.
-    Copy the Node Exporter binary to /usr/local/bin/node_exporter with appropriate permissions (0755).
-    Create a system user named node_exporter.
-    Set up a systemd service for Node Exporter with the provided configuration.
-    Create a Prometheus config file using a template prometheus.yml.j2 and place it in /etc/prometheus/prometheus.yml.
-    Create a Grafana provisioning file named grafana_datasource.yml and store it in /etc/grafana/provisioning/datasources/prometheus.yml.
+Follow these steps to set up Grafana and Prometheus on your laptop:
 
-Additionally, there are handlers defined to reload systemd, Prometheus, and Grafana after any configuration changes are made.
-Configuration Files
+    Install Grafana:
+        Download and install Grafana from the official website: https://grafana.com/grafana/download
+        Start the Grafana server using the appropriate command for your operating system.
 
-Make sure the following configuration files are present in the playbook directory:
+    Install Prometheus:
 
-    prometheus.yml.j2: Template for Prometheus configuration file.
-    grafana_datasource.yml: Configuration file for Grafana provisioning.
+        Download and install Prometheus from the official website: https://prometheus.io/download
 
-Please customize these files according to your monitoring and visualization needs.
-Notes
+        Extract the downloaded archive and navigate to the Prometheus directory.
 
-    This playbook is intended for deployment on a local machine. For production environments, additional considerations and security measures should be taken.
+        Modify the prometheus.yml configuration file to scrape data from Node Exporter on your target hosts. For example:
 
-    Please ensure you have the necessary permissions to execute this playbook and modify system configurations on the target machine.
+        yaml
 
-    If you encounter any issues or errors during the deployment, review the playbook, configurations, and the target machine's setup to resolve the problems.
+        global:
+          scrape_interval: 15s
 
-    For more information about Ansible and its capabilities, refer to the official Ansible documentation.
+        scrape_configs:
+          - job_name: 'node_exporter'
+            static_configs:
+              - targets: ['hostname1:9100', 'hostname2:9100', 'hostname3:9100']
+
+        Replace hostname1, hostname2, etc., with the actual hostnames or IP addresses of your target hosts.
+
+        Start Prometheus using the appropriate command for your operating system.
+
+    Configure Grafana Data Source:
+        Open Grafana in your web browser (http://localhost:3000 by default).
+        Log in with the default credentials (admin/admin).
+        Add a Prometheus data source:
+            Click on the "Configuration" gear icon on the left sidebar.
+            Select "Data Sources" and click on "Add data source."
+            Choose "Prometheus" as the data source type.
+            Configure the URL to point to your locally running Prometheus instance (e.g., http://localhost:9090).
+            Save the data source.
+
+    Create Grafana Dashboards:
+        Explore Grafana's dashboard panel and create visualizations using the data from Prometheus.
+        Import pre-built dashboards for Node Exporter metrics from the Grafana dashboard repository or create your custom dashboards.
+
+#Step 5: Monitor Node Exporter Metrics
+
+Now that you have set up Grafana and Prometheus on your laptop, you can monitor the metrics collected from Node Exporter on your target hosts. Grafana will display the visualizations based on the data fetched from Prometheus.
