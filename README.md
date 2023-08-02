@@ -1,13 +1,13 @@
-##Ansible Playbook to Deploy Node Exporter on Multiple Hosts and Set Up Grafana & Prometheus
+# Ansible Playbook to Deploy Node Exporter on Multiple Hosts and Set Up Grafana & Prometheus
 
-#Step 1: Prerequisites
+## Step 1: Prerequisites
 
 Before proceeding with the playbook, ensure that you have the following prerequisites:
 
     Ansible installed on your laptop.
     Multiple target hosts where you want to deploy Node Exporter (ensure SSH access is set up).
 
-#Step 2: Create the Ansible Playbook
+## Step 2: Create the Ansible Playbook
 
 Create a new file named deploy_node_exporter.yml with the following content:
 
@@ -37,7 +37,7 @@ hostname2
 hostname3
 # Add all your target hosts here
 
-#Step 3: Deploy Node Exporter to Multiple Hosts
+## Step 3: Deploy Node Exporter to Multiple Hosts
 
 Run the Ansible playbook using the following command:
 
@@ -47,7 +47,7 @@ ansible-playbook -i /path/to/your/hosts/file deploy_node_exporter.yml
 
 This will install Node Exporter on all the target hosts specified in the your_target_group.
 
-#Step 4: Set Up Grafana & Prometheus on Your Laptop
+## Step 4: Set Up Grafana & Prometheus on Your Laptop
 
 Follow these steps to set up Grafana and Prometheus on your laptop:
 
@@ -91,6 +91,6 @@ Follow these steps to set up Grafana and Prometheus on your laptop:
         Explore Grafana's dashboard panel and create visualizations using the data from Prometheus.
         Import pre-built dashboards for Node Exporter metrics from the Grafana dashboard repository or create your custom dashboards.
 
-#Step 5: Monitor Node Exporter Metrics
+## Step 5: Monitor Node Exporter Metrics
 
 Now that you have set up Grafana and Prometheus on your laptop, you can monitor the metrics collected from Node Exporter on your target hosts. Grafana will display the visualizations based on the data fetched from Prometheus.
