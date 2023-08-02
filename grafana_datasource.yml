@@ -1,0 +1,15 @@
+---
+- name: Deploy Grafana Datasource Config
+  hosts: local # Replace with the group of hosts defined in your hosts file
+
+  tasks:
+    - name: Copy grafana_datasource.yml to remote hosts
+      copy:
+        src: grafana_datasource.yml
+        dest: /home/kavya/dockerrepo/grafana_datasource.yml  # Replace with the path where you want to copy the file on remote hosts
+        remote_src: yes  # This tells Ansible to look for the file on the remote hosts
+
+      become: true  # This enables privilege escalation to copy the file, if required
+
+    # Add any other tasks you need for the deployment
+

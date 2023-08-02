@@ -1,0 +1,86 @@
+---                         
+- name: Deploy Node Exporter
+  hosts: local
+  become: true
+
+  tasks:
+    - name: Install necessary dependencies
+      apt:
+        name: ['curl']
+        state: present
+      when: ansible_pkg_mgr == "apt"
+
+    - name: Download Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter.tar.gz"
+
+    - name: Extract Node Exporter
+      unarchive:
+        src: "/tmp/node_exporter.tar.gz"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Copy Node Exporter binary
+      copy:
+        src: "/tmp/node_exporter-1.2.2.linux-amd64/node_exporter"
+        dest: "/usr/local/bin/node_exporter"
+        mode: "0755"
+
+    - name: Create Node Exporter user
+      user:
+        name: "node_exporter"
+        system: yes
+
+    - name: Set up systemd service
+      copy:
+        content: |
+          [Unit]
+          Description=Node Exporter
+          After=network.target
+
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/node_exporter.service
+      notify:
+        - Reload systemd
+
+  # Task to create Prometheus config file
+    - name: Create Prometheus config file
+      template:
+        src: prometheus.yml
+        dest: /home/kavya/dockerrepo/prometheus.yml
+      notify:
+        - Reload Prometheus
+
+    # Task to create Grafana provisioning file
+    - name: Create Grafana provisioning file
+      copy:
+        src: grafana_datasource.yml
+        dest: /home/kavya/dockerrepo/grafana/prometheus.yml
+      notify:
+        - Reload Grafana
+
+    
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    # Handler to reload Prometheus
+    - name: Reload Prometheus
+      systemd:
+        name: prometheus
+        state: restarted
+
+    # Handler to reload Grafana
+    - name: Reload Grafana
+      systemd:
+        name: grafana-server
+        state: restarted

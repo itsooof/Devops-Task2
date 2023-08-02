@@ -1,0 +1,14 @@
+---
+- name: Deploy node_exporter.yml
+  hosts: local # Replace with the group of hosts defined in your hosts file
+
+  tasks:
+    - name: Copy node_exporter.yml to remote hosts
+      copy:
+        src: /home/kavya/dockerrepo/node_exporter.yml
+        dest: /home/kavya/dockerrepo/node_exporter.yml  # Replace with the path where you want to copy the file on remote hosts
+      become: true  # This enables privilege escalation to copy the file, if required
+
+    # Add any other tasks you need for the deployment
+    # For example, you might want to restart the node_exporter service after copying the file.
+
